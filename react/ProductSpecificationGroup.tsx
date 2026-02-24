@@ -1,5 +1,8 @@
-import React, { FC, useMemo, useContext, ReactNode } from 'react'
-import { useProduct, SpecificationGroup } from 'vtex.product-context'
+import type { ReactNode } from 'react'
+import React, { useMemo } from 'react'
+import { useProduct } from 'vtex.product-context'
+
+import { ProductSpecificationGroupProvider } from './context/ProductSpecificationGroupContext'
 
 interface ProductSpecificationGroupProps {
   filter?: {
@@ -14,14 +17,17 @@ const defaultFilter: ProductSpecificationGroupProps['filter'] = {
   specificationGroups: [],
 }
 
-const ProductSpecificationGroup: FC<ProductSpecificationGroupProps> = ({
+const ProductSpecificationGroup = ({
   filter = defaultFilter,
   children,
-}) => {
-  const { product } = useProduct()
+}: ProductSpecificationGroupProps) => {
+  const { product } = useProduct() ?? {}
 
   const { type, specificationGroups: filterSpecificationGroups } = filter
-  const specificationGroups = product?.specificationGroups ?? []
+  const specificationGroups = useMemo(
+    () => product?.specificationGroups ?? [],
+    [product]
+  )
 
   const groups = useMemo(
     () =>
@@ -54,31 +60,6 @@ const ProductSpecificationGroup: FC<ProductSpecificationGroupProps> = ({
       ))}
     </>
   )
-}
-
-const SpecificationGroupContext = React.createContext<
-  SpecificationGroup | undefined
->(undefined)
-
-interface ProductSpecificationGroupProviderProps {
-  group: SpecificationGroup
-}
-
-const ProductSpecificationGroupProvider: FC<ProductSpecificationGroupProviderProps> = ({
-  group,
-  children,
-}) => {
-  return (
-    <SpecificationGroupContext.Provider value={group}>
-      {children}
-    </SpecificationGroupContext.Provider>
-  )
-}
-
-export const useProductSpecificationGroup = () => {
-  const group = useContext(SpecificationGroupContext)
-
-  return group
 }
 
 export default ProductSpecificationGroup

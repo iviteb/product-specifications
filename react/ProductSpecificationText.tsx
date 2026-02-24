@@ -1,10 +1,11 @@
-import React, { FC, useMemo, ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import React, { useMemo } from 'react'
 import { IOMessageWithMarkers } from 'vtex.native-types'
 import { useCssHandles, applyModifiers } from 'vtex.css-handles'
 
-import { useProductSpecification } from './ProductSpecification'
-import { useProductSpecificationGroup } from './ProductSpecificationGroup'
-import { useProductSpecificationValue } from './ProductSpecificationValues'
+import { useProductSpecification } from './context/ProductSpecificationContext'
+import { useProductSpecificationGroup } from './context/ProductSpecificationGroupContext'
+import { useProductSpecificationValue } from './context/ProductSpecificationValueContext'
 
 interface Props {
   message: string
@@ -25,11 +26,8 @@ const CSS_HANDLES = [
   'specificationValue',
 ] as const
 
-const ProductSpecificationText: FC<Props> = ({
-  message = '',
-  markers = [],
-}) => {
-  const handles = useCssHandles(CSS_HANDLES)
+const ProductSpecificationText = ({ message = '', markers = [] }: Props) => {
+  const { handles } = useCssHandles(CSS_HANDLES)
   const group = useProductSpecificationGroup()
   const specification = useProductSpecification()
   const value = useProductSpecificationValue()

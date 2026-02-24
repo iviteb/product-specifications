@@ -1,8 +1,10 @@
-import React, { FC, useMemo, useContext } from 'react'
+import type { ReactNode } from 'react'
+import React from 'react'
 
-import { useProductSpecification } from './ProductSpecification'
+import { useProductSpecification } from './context/ProductSpecificationContext'
+import { ProductSpecificationValueProvider } from './context/ProductSpecificationValueContext'
 
-const ProductSpecificationValues: FC = ({ children }) => {
+const ProductSpecificationValues = ({ children }: { children: ReactNode }) => {
   const specification = useProductSpecification()
 
   if (!specification) {
@@ -23,43 +25,6 @@ const ProductSpecificationValues: FC = ({ children }) => {
       ))}
     </>
   )
-}
-
-interface ProductSpecificationValueProviderProps {
-  value: string
-  isLast: boolean
-  isFirst: boolean
-}
-
-const SpecificationValueContext = React.createContext<
-  ProductSpecificationValueProviderProps | undefined
->(undefined)
-
-const ProductSpecificationValueProvider: FC<ProductSpecificationValueProviderProps> = ({
-  value,
-  isLast,
-  isFirst,
-  children,
-}) => {
-  const contextValue = useMemo(() => {
-    return {
-      value,
-      isLast,
-      isFirst,
-    }
-  }, [value, isLast, isFirst])
-
-  return (
-    <SpecificationValueContext.Provider value={contextValue}>
-      {children}
-    </SpecificationValueContext.Provider>
-  )
-}
-
-export const useProductSpecificationValue = () => {
-  const value = useContext(SpecificationValueContext)
-
-  return value
 }
 
 export default ProductSpecificationValues
