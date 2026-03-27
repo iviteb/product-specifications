@@ -1,10 +1,48 @@
-import React, { FC, useContext } from 'react'
-import { Specification } from 'vtex.product-context'
+import type { ReactNode } from 'react'
+import React, { useMemo } from 'react'
 
-import { useProductSpecificationGroup } from './ProductSpecificationGroup'
+import { useProductSpecificationGroup } from './context/ProductSpecificationGroupContext'
+import { ProductSpecificationProvider } from './context/ProductSpecificationContext'
 
-const ProductSpecificationGroup: FC = ({ children }) => {
+interface ProductSpecificationProps {
+  filter?: {
+    type: 'hide' | 'show'
+    specifications: string[]
+  }
+  children: ReactNode
+}
+
+const defaultFilter: ProductSpecificationProps['filter'] = {
+  type: 'hide',
+  specifications: [],
+}
+
+const ProductSpecificationGroup = ({
+  filter = defaultFilter,
+  children,
+}: ProductSpecificationProps) => {
   const group = useProductSpecificationGroup()
+  const specificationsGroup = group?.specifications
+  const { type, specifications: filterSpecificationGroups } = filter
+
+  const specifications = useMemo(
+    () =>
+      specificationsGroup?.filter((spec) => {
+        const hasSpecification = filterSpecificationGroups.includes(
+          spec.originalName
+        )
+
+        if (
+          (type === 'hide' && hasSpecification) ||
+          (type === 'show' && !hasSpecification)
+        ) {
+          return false
+        }
+
+        return true
+      }),
+    [specificationsGroup, type, filterSpecificationGroups]
+  )
 
   if (!group) {
     return null
@@ -12,38 +50,13 @@ const ProductSpecificationGroup: FC = ({ children }) => {
 
   return (
     <>
-      {group.specifications.map((specification, index) => (
-        <ProductSpecificationProvider key={index} specification={specification}>
+      {specifications?.map((spec, index) => (
+        <ProductSpecificationProvider key={index} specification={spec}>
           {children}
         </ProductSpecificationProvider>
       ))}
     </>
   )
-}
-
-const SpecificationContext = React.createContext<Specification | undefined>(
-  undefined
-)
-
-interface ProductSpecificationProviderProps {
-  specification: Specification
-}
-
-const ProductSpecificationProvider: FC<ProductSpecificationProviderProps> = ({
-  specification,
-  children,
-}) => {
-  return (
-    <SpecificationContext.Provider value={specification}>
-      {children}
-    </SpecificationContext.Provider>
-  )
-}
-
-export const useProductSpecification = () => {
-  const group = useContext(SpecificationContext)
-
-  return group
 }
 
 export default ProductSpecificationGroup
